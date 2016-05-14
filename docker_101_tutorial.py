@@ -81,29 +81,105 @@ class docker_101_tutorial(ShutItModule):
 		shutit.login(command='vagrant ssh')
 		shutit.login(command='sudo su -',password='vagrant')
 
+		# DOCKER SETUP
 		shutit.install('docker.io')
 		shutit.send('cat /etc/issue',note='We are in an ubuntu vm')
 		shutit.send('yum',check_exit=False,note='yum is not available, for example')
-		shutit.login('docker run -ti centos /bin/bash',note='Run up a centos docker image.',timeout=999)
+
+		# DOCKER RUN
+		shutit.login('docker run -ti --name docker-101-centos centos /bin/bash',note='Run up a centos docker image and attach to it with the bash command.',timeout=999)
 		shutit.send('ps -ef')
-		shutit.install('iproute')
+		shutit.install('iproute',note='Install the iproute package into this container so we can show that we have our own net stack')
 		shutit.send('ip route')
-		shutit.logout()
+		shutit.send('ls')
+		shutit.send('whoami',note='By default I am root')
+		shutit.logout(note='log out of the bash shell, terminating the container')
+
+		# DOCKER PS
+		shutit.login('docker ps -a',note='That container is still there, but not running because the bash process terminated when we logged out.')
+
+		# DOCKER RM
+		shutit.login('docker rm docker-101-centos centos',note='Remove the container.')
+		shutit.login('docker ps -a',note='The container has gone.')
+		shutit.send('echo',note='Next we start up 100 containers.')
 		for i in range(1,100):
 			shutit.send('docker run -d --name centos_container_' + str(i) + ' centos sleep infinity',timeout=500)
 
-		shutit.send('docker ps')
+		shutit.send('docker ps',note='Show all 100 containers.')
 
-		shutit.login(command='docker exec -ti centos_container_1 /bin/bash')
-		shutit.send('touch file1')
-		shutit.send('ls')
+		# DOCKER EXEC
+		shutit.login(command='docker exec -ti centos_container_1 /bin/bash',note='Log onto container 1 to create a file that only exists in that container')
+		shutit.send('pwd',note='We start in the root folder.')
+		shutit.send('touch myfile',note='Create file: myfile.')
+		shutit.send('ls',note='The file is there.')
 		shutit.logout()
 
-		shutit.login('docker exec -ti centos_container_2 /bin/bash')
-		shutit.send('ls')
+		shutit.login('docker exec -ti centos_container_2 /bin/bash',note='Log onto container 2 to show the file is not there.')
+		shutit.send('pwd',note='We start in the root folder here too.')
+		shutit.send('ls',note='The file is not here.')
 		shutit.logout()
+
+		shutit.login(command='docker exec -ti centos_container_1 /bin/bash',note='Log onto container 1 to create a file that only exists in that container')
+		shutit.send('pwd',note='We start in the root folder again.')
+		shutit.send('ls',note='The file is still there in the first container.')
+		shutit.logout()
+
+		# DOCKER IMAGES
+		shutit.send('docker images',note='We can list the images we have on this _host_. We have one image (the centos one) which is the source of all our containers.')
+		shutit.send('docker ps',note='But we have 100 containers.')
+
+		# DOCKER COMMIT / HISTORY / LAYERS
+		shutit.send('docker history centos',note='Containers are composed of _layers_. Each one represents a set of file changes analagous (but not the same as) a git commit. This is the history of the "centos" image layers.')
+		shutit.send('docker commit centos_container_1 docker_101_image',note='To create a new image with myfile in, commit the container.')
+		shutit.send('docker images',note='That image is now listed alongside the centos one on our host.')
+		shutit.send('docker history centos',note='Show the centos history.')
+		shutit.send('docker history docker_101_image',note='Show the docker_101_image history. It is the same as the centos image with our extra layer.')
+
+		# DOCKER LOGIN
+		shutit.pause_point('Now log in to docker with "docker login" please.')
+		docker_username = shutit.get_input('Please input your dockerhub username')
+		shutit.send('docker tag docker_101_image ' + docker_username + '/docker_101_image',note='Re-tag the image with your docker username-space.')
+		shutit.send('docker images',note='It is listed as a separate image with the same ID.')
+		shutit.send('docker push ' + docker_username + '/docker_101_image',note='It is listed as a separate image with the same ID.')
+
+		# PULL
+		shutit.send('docker ps -a -q | xargs docker rm -f',note='Clean up all containers.')
+		shutit.send('docker ps -a',note='No containers exist.')
+		shutit.send('docker rmi ' + docker_username + '/docker_101_image',note='Delete our newly-created image.')
+		shutit.send('docker images',note='It is no longer available. Only the centos image remains, which we keep to avoid re-downloading.')
+		shutit.send('docker pull ' + docker_username + '/docker_101_image',note='Pull the image back down. Notice it is a lot faster as only the extra layer we created is required.')
+		shutit.login('docker run -ti ' + docker_username + '/docker_101_image /bin/bash',note='Run up bash in a new container from that image.')
+		shutit.send('pwd',note='I am in the root folder again')
+		shutit.send('ls',note='And the file we create earlier is there')
+		shutit.logout(note='exit the container')
+		shutit.send('docker ps -a -q | xargs docker rm -f',note='Clean up all containers on the host.')
 
 		# DOCKERFILE
+		shutit.send('mkdir -p docker_build && cd docker_build',note='Create a folder for our build.')
+		shutit.send('''cat > Dockerfile << END
+FROM centos
+RUN touch myfile
+CMD ['/bin/bash']
+END''',note='Create a Dockerfile that does the same action as before.')
+		docker_image_name = shutit.get_input('Please input a new image name.')
+		shutit.send('docker build -t ' + docker_username + '/' + docker_image_name,note='Build the docker image using the Dockerfile (rather than running and committing), and tag it with a new image name')
+		shutit.send('docker push ' + docker_username + '/' + docker_image_name,note='Push the image to the dockerhub')
+		shutit.send('docker rmi ' + docker_username + '/' + docker_image_name,note='Remove the image from our local machine')
+		shutit.send('docker images',note='It is no longer available. Only the centos image remains.')
+		shutit.send('rm -rf *',note='Remove the Dockerfile we created')
+
+		# DOCKERFILE FROM THAT BASE
+		shutit.send('''cat > Dockerfile << END
+FROM ''' + docker_username + '/' + docker_image_name + '''
+RUN touch myfile2
+CMD ['/bin/bash']
+END''',note='Create a Dockerfile that builds on the last one (rather than centos).')
+		shutit.send('docker build -t newimage',note='Build this new image from the new Dockerfile.')
+		shutit.login('docker run -ti newimage',note='Run the newly-create image.')
+		shutit.send('ls',note='The file myfile2 (from our new layer) and myfile (from our old image) is there.')
+		shutit.logout(note='Log out of the new container')
+		shutit.send('docker rmi newimage',note='Destroy this new image')
+		shutit.send('docker ps -a -q | xargs docker rm -f',note='Clean up all containers on the host.')
 
 		shutit.logout()
 		shutit.logout()
