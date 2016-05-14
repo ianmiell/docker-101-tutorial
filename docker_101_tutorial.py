@@ -82,24 +82,24 @@ class docker_101_tutorial(ShutItModule):
 		shutit.login(command='sudo su -',password='vagrant')
 
 		shutit.install('docker.io')
-		shutit.send('cat /etc/issue')
-		shutit.send('yum',check_exit=False)
-		shutit.login('docker run -ti centos /bin/bash')
+		shutit.send('cat /etc/issue',note='We are in an ubuntu vm')
+		shutit.send('yum',check_exit=False,note='yum is not available, for example')
+		shutit.login('docker run -ti centos /bin/bash',note='Run up a centos docker image.',timeout=999)
 		shutit.send('ps -ef')
+		shutit.install('iproute')
 		shutit.send('ip route')
 		shutit.logout()
 		for i in range(1,100):
-			shutit.send('docker run -d --name centos_container_' + str(i) + ' centos sleep infinity')
+			shutit.send('docker run -d --name centos_container_' + str(i) + ' centos sleep infinity',timeout=500)
 
 		shutit.send('docker ps')
 
-		shutit.login('docker exec -ti centos1 /bin/bash')
+		shutit.login(command='docker exec -ti centos_container_1 /bin/bash')
 		shutit.send('touch file1')
 		shutit.send('ls')
 		shutit.logout()
 
-		shutit.login('docker exec -ti centos2 /bin/bash')
-		shutit.send('touch file1')
+		shutit.login('docker exec -ti centos_container_2 /bin/bash')
 		shutit.send('ls')
 		shutit.logout()
 
