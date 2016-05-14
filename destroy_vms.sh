@@ -1,8 +1,9 @@
 #!/bin/bash
+set -x
 while true 
 do
-	VBoxManage list runningvms | grep docker_101_tutorial | awk '{print $1}' | xargs -IXXX VBoxManage controlvm 'XXX' poweroff && VBoxManage list vms | grep docker_101_tutorial || awk '{print $1}'  | xargs -IXXX VBoxManage unregistervm 'XXX' --delete
-	if [[ $(VBoxManage list vms | grep docker_101_tutorial | wc -l) == '0' ]]
+	VBoxManage list runningvms | grep docker_101_tutorial | awk '{print $1}' | xargs -IXXX VBoxManage controlvm 'XXX' poweroff && VBoxManage list vms | grep docker_101_tutorial | awk '{print $1}'  | xargs -IXXX VBoxManage unregistervm 'XXX' --delete
+	if [[ $(VBoxManage list vms | grep docker_101_tutorial | wc -l) -eq '0' ]]
 	then
 		break
 	else

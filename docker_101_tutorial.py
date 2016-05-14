@@ -99,8 +99,8 @@ class docker_101_tutorial(ShutItModule):
 		shutit.login('docker ps -a',note='That container is still there, but not running because the bash process terminated when we logged out.')
 
 		# DOCKER RM
-		shutit.login('docker rm docker-101-centos centos',note='Remove the container.')
-		shutit.login('docker ps -a',note='The container has gone.')
+		shutit.send('docker rm docker-101-centos centos',note='Remove the container.')
+		shutit.send('docker ps -a',note='The container has gone.')
 		shutit.send('echo',note='Next we start up 100 containers.')
 		for i in range(1,100):
 			shutit.send('docker run -d --name centos_container_' + str(i) + ' centos sleep infinity',timeout=500)
