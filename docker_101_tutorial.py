@@ -166,7 +166,7 @@ END''',note='Create a Dockerfile that does the same action as before.')
 		shutit.send('docker push ' + docker_username + '/' + docker_image_name,note='Push the image to the dockerhub')
 		shutit.send('docker rmi ' + docker_username + '/' + docker_image_name,note='Remove the image from our local machine')
 		shutit.send('docker images',note='It is no longer available. Only the centos image remains.')
-		shutit.send('rm -rf *',note='Remove the Dockerfile we created')
+		shutit.send('rm -rf Dockerfile',note='Remove the Dockerfile we created')
 
 		# DOCKERFILE FROM THAT BASE
 		shutit.send('''cat > Dockerfile << END
