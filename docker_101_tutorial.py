@@ -88,18 +88,18 @@ class docker_101_tutorial(ShutItModule):
 
 		# DOCKER RUN
 		shutit.login('docker run -ti --name docker-101-centos centos /bin/bash',note='Run up a centos docker image and attach to it with the bash command.',timeout=999)
-		shutit.send('ps -ef')
-		shutit.install('iproute',note='Install the iproute package into this container so we can show that we have our own net stack')
-		shutit.send('ip route')
-		shutit.send('ls')
+		shutit.install('iproute')
+		shutit.send('ps -ef',note='We are in a container, only the bash process is running')
+		shutit.send('ip route',note='We have our own network stack')
 		shutit.send('whoami',note='By default I am root')
-		shutit.logout(note='log out of the bash shell, terminating the container')
+		shutit.send('ls',note='And we have our own filesystem')
+		shutit.logout(note='log out of the bash shell, terminating the container - type exit')
 
 		# DOCKER PS
 		shutit.login('docker ps -a',note='That container is still there, but not running because the bash process terminated when we logged out.')
 
 		# DOCKER RM
-		shutit.send('docker rm docker-101-centos centos',note='Remove the container.')
+		shutit.send('docker rm docker-101-centos',note='Remove the container.')
 		shutit.send('docker ps -a',note='The container has gone.')
 		shutit.send('echo',note='Next we start up 100 containers.')
 		for i in range(1,100):
