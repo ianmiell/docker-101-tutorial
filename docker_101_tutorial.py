@@ -112,16 +112,16 @@ class docker_101_tutorial(ShutItModule):
 		shutit.send('pwd',note='We start in the root folder.')
 		shutit.send('touch myfile',note='Create file: myfile.')
 		shutit.send('ls',note='The file is there.')
-		shutit.logout(note='log out of the bash shell')
+		shutit.logout(note='log out of the bash shell - type exit')
 
 		shutit.login('docker exec -ti centos_container_2 /bin/bash',note='Log onto container 2 to show the file is not there.')
 		shutit.send('pwd',note='We start in the root folder here too.')
 		shutit.send('ls',note='The file "myfile" is not here.')
-		shutit.logout(note='log out of the bash shell')
+		shutit.logout(note='log out of the bash shell - type exit')
 
 		shutit.login(command='docker exec -ti centos_container_1 /bin/bash',note='Log onto container 1 again')
 		shutit.send('ls',note='The file "myfile" is still there in the first container.')
-		shutit.logout(note='log out of the bash shell')
+		shutit.logout(note='log out of the bash shell - type exit')
 
 		# DOCKER IMAGES
 		shutit.send('docker images',note='We can list the images we have on this _host_. We have one image (the centos one) which is the source of all our containers.')
@@ -175,7 +175,7 @@ END''',note='Create a Dockerfile that builds on the last one (rather than centos
 		shutit.send('docker build -t newimage',note='Build this new image from the new Dockerfile.')
 		shutit.login('docker run -ti newimage',note='Run the newly-create image.')
 		shutit.send('ls',note='The file myfile2 (from our new layer) and myfile (from our old image) is there.')
-		shutit.logout(note='Log out of the new container')
+		shutit.logout(note='Log out of the new container - type exit')
 		shutit.send('docker rmi newimage',note='Destroy this new image')
 		shutit.send('docker ps -a -q | xargs docker rm -f',note='Clean up all containers on the host.')
 
