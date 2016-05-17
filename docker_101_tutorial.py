@@ -96,7 +96,7 @@ class docker_101_tutorial(ShutItModule):
 		shutit.logout(note='log out of the bash shell, terminating the container - type exit')
 
 		# DOCKER PS
-		shutit.login('docker ps -a',note='That container is still there, but not running because the bash process terminated when we logged out.')
+		shutit.send('docker ps -a',note='That container is still there, but not running because the bash process terminated when we logged out.')
 
 		# DOCKER RM
 		shutit.send('docker rm docker-101-centos',note='Remove the container.')
