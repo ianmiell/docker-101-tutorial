@@ -171,7 +171,8 @@ END''',note='Create a Dockerfile that does the same action as before.')
 FROM ''' + docker_username + '/' + docker_image_name + '''
 RUN touch myfile2
 CMD ['/bin/bash']
-END''',note='Create a Dockerfile that builds on the last one (rather than centos).')
+END''')
+		shutit.send('cat Dockerfile',note='Dockerfile created for you that builds on the last one (rather than centos).')
 		shutit.send('docker build -t newimage',note='Build this new image from the new Dockerfile.')
 		shutit.login('docker run -ti newimage',note='Run the newly-create image.')
 		shutit.send('ls',note='The file myfile2 (from our new layer) and myfile (from our old image) is there.')
