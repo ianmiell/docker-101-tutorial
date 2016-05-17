@@ -1,6 +1,8 @@
 Docker 101 Tutorial
 ===================
 
+[![asciicast](https://asciinema.org/a/45918.png)](https://asciinema.org/a/45918)
+
 Ideally you will have vagrant and virtualbox pre-installed, but ShutIt will try and install this for you.
 
 ```
