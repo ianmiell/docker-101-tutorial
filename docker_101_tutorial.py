@@ -112,17 +112,16 @@ class docker_101_tutorial(ShutItModule):
 		shutit.send('pwd',note='We start in the root folder.')
 		shutit.send('touch myfile',note='Create file: myfile.')
 		shutit.send('ls',note='The file is there.')
-		shutit.logout()
+		shutit.logout(note='log out of the bash shell')
 
 		shutit.login('docker exec -ti centos_container_2 /bin/bash',note='Log onto container 2 to show the file is not there.')
 		shutit.send('pwd',note='We start in the root folder here too.')
-		shutit.send('ls',note='The file is not here.')
-		shutit.logout()
+		shutit.send('ls',note='The file "myfile" is not here.')
+		shutit.logout(note='log out of the bash shell')
 
-		shutit.login(command='docker exec -ti centos_container_1 /bin/bash',note='Log onto container 1 to create a file that only exists in that container')
-		shutit.send('pwd',note='We start in the root folder again.')
-		shutit.send('ls',note='The file is still there in the first container.')
-		shutit.logout()
+		shutit.login(command='docker exec -ti centos_container_1 /bin/bash',note='Log onto container 1 again')
+		shutit.send('ls',note='The file "myfile" is still there in the first container.')
+		shutit.logout(note='log out of the bash shell')
 
 		# DOCKER IMAGES
 		shutit.send('docker images',note='We can list the images we have on this _host_. We have one image (the centos one) which is the source of all our containers.')
@@ -131,20 +130,19 @@ class docker_101_tutorial(ShutItModule):
 		# DOCKER COMMIT / HISTORY / LAYERS
 		shutit.send('docker history centos',note='Containers are composed of _layers_. Each one represents a set of file changes analagous (but not the same as) a git commit. This is the history of the "centos" image layers.')
 		shutit.send('docker commit centos_container_1 docker_101_image',note='To create a new image with myfile in, commit the container.')
+		shutit.send('docker ps -q -a | xargs -n 1 docker rm -f 2>&1 > /dev/null &',note='Delete all containers in the background.')
 		shutit.send('docker images',note='That image is now listed alongside the centos one on our host.')
 		shutit.send('docker history centos',note='Show the centos history.')
 		shutit.send('docker history docker_101_image',note='Show the docker_101_image history. It is the same as the centos image with our extra layer.')
 
 		# DOCKER LOGIN
 		shutit.pause_point('Now log in to docker with "docker login" please.')
-		docker_username = shutit.get_input('Please input your dockerhub username')
+		docker_username = shutit.get_input('Please input your dockerhub username: ')
 		shutit.send('docker tag docker_101_image ' + docker_username + '/docker_101_image',note='Re-tag the image with your docker username-space.')
 		shutit.send('docker images',note='It is listed as a separate image with the same ID.')
 		shutit.send('docker push ' + docker_username + '/docker_101_image',note='It is listed as a separate image with the same ID.')
 
 		# PULL
-		shutit.send('docker ps -a -q | xargs docker rm -f',note='Clean up all containers.')
-		shutit.send('docker ps -a',note='No containers exist.')
 		shutit.send('docker rmi ' + docker_username + '/docker_101_image',note='Delete our newly-created image.')
 		shutit.send('docker images',note='It is no longer available. Only the centos image remains, which we keep to avoid re-downloading.')
 		shutit.send('docker pull ' + docker_username + '/docker_101_image',note='Pull the image back down. Notice it is a lot faster as only the extra layer we created is required.')
