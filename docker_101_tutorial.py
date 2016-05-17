@@ -144,23 +144,26 @@ class docker_101_tutorial(ShutItModule):
 
 		# PULL
 		shutit.send('docker rmi ' + docker_username + '/docker_101_image',note='Delete our newly-created image.')
-		shutit.send('docker images',note='It is no longer available. Only the centos image remains, which we keep to avoid re-downloading.')
+		shutit.send('docker rmi docker_101_image',note='Delete the previously-created identical image also.')
+		shutit.send('docker images',note='Neither image is now available. Only the centos image remains, which we keep to avoid re-downloading.')
 		shutit.send('docker pull ' + docker_username + '/docker_101_image',note='Pull the image back down. Notice it is a lot faster as only the extra layer we created is required.')
 		shutit.login('docker run -ti ' + docker_username + '/docker_101_image /bin/bash',note='Run up bash in a new container from that image.')
 		shutit.send('pwd',note='I am in the root folder again')
 		shutit.send('ls',note='And the file we create earlier is there')
 		shutit.logout(note='exit the container')
 		shutit.send('docker ps -a -q | xargs docker rm -f',note='Clean up all containers on the host.')
+		shutit.send('docker rmi ' + docker_username + '/docker_101_image',note='Remove the image we just pulled.')
 
 		# DOCKERFILE
 		shutit.send('mkdir -p docker_build && cd docker_build',note='Create a folder for our build.')
 		shutit.send('''cat > Dockerfile << END
 FROM centos
-RUN touch myfile
+RUN touch /root/myfile
 CMD ['/bin/bash']
-END''',note='Create a Dockerfile that does the same action as before.')
+END''')
+		shutit.send('cat Dockerfile',note='Cat the Dockerfile created for you. This Dockerfile that does the same action as before.')
 		docker_image_name = shutit.get_input('Please input a new image name.')
-		shutit.send('docker build -t ' + docker_username + '/' + docker_image_name,note='Build the docker image using the Dockerfile (rather than running and committing), and tag it with a new image name')
+		shutit.send('docker build -t ' + docker_username + '/' + docker_image_name + ' .',note='Build the docker image using the Dockerfile (rather than running and committing), and tag it with a new image name')
 		shutit.send('docker push ' + docker_username + '/' + docker_image_name,note='Push the image to the dockerhub')
 		shutit.send('docker rmi ' + docker_username + '/' + docker_image_name,note='Remove the image from our local machine')
 		shutit.send('docker images',note='It is no longer available. Only the centos image remains.')
@@ -169,12 +172,12 @@ END''',note='Create a Dockerfile that does the same action as before.')
 		# DOCKERFILE FROM THAT BASE
 		shutit.send('''cat > Dockerfile << END
 FROM ''' + docker_username + '/' + docker_image_name + '''
-RUN touch myfile2
+RUN touch /root/myfile2
 CMD ['/bin/bash']
 END''')
 		shutit.send('cat Dockerfile',note='Dockerfile created for you that builds on the last one (rather than centos).')
-		shutit.send('docker build -t newimage',note='Build this new image from the new Dockerfile.')
-		shutit.login('docker run -ti newimage',note='Run the newly-create image.')
+		shutit.send('docker build -t newimage .',note='Build this new image from the new Dockerfile.')
+		shutit.login('docker run -ti newimage /bin/bash',note='Run the newly-create image.')
 		shutit.send('ls',note='The file myfile2 (from our new layer) and myfile (from our old image) is there.')
 		shutit.logout(note='Log out of the new container - type exit')
 		shutit.send('docker rmi newimage',note='Destroy this new image')
