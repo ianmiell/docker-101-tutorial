@@ -1,5 +1,7 @@
 #!/bin/bash
 #set -x
+if [[ $(which VBoxManage) != '' ]]
+then
 while true 
 do
 	VBoxManage list runningvms | grep docker_101_tutorial | awk '{print $1}' | xargs -IXXX VBoxManage controlvm 'XXX' poweroff && VBoxManage list vms | grep docker_101_tutorial | awk '{print $1}'  | xargs -IXXX VBoxManage unregistervm 'XXX' --delete
@@ -11,3 +13,4 @@ do
 		sleep 10
 	fi
 done
+fi
