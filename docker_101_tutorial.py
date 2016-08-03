@@ -83,6 +83,7 @@ class docker_101_tutorial(ShutItModule):
 
 		# DOCKER SETUP
 		shutit.install('docker.io')
+		shutit.send('docker pull centos')
 		shutit.send('cat /etc/issue',note='We are in an ubuntu vm')
 		shutit.send('yum',check_exit=False,note='yum is not available, for example')
 
@@ -180,8 +181,8 @@ END''')
 		shutit.login('docker run -ti newimage /bin/bash',note='Run the newly-create image.')
 		shutit.send('ls',note='The file myfile2 (from our new layer) and myfile (from our old image) is there.')
 		shutit.logout(note='Log out of the new container - type exit')
-		shutit.send('docker rmi newimage',note='Destroy this new image')
 		shutit.send('docker ps -a -q | xargs docker rm -f',note='Clean up all containers on the host.')
+		shutit.send('docker rmi newimage',note='Destroy this new image')
 
 		shutit.logout()
 		shutit.logout()
