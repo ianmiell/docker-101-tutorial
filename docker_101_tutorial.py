@@ -131,7 +131,7 @@ class docker_101_tutorial(ShutItModule):
 		# DOCKER COMMIT / HISTORY / LAYERS
 		shutit.send('docker history centos',note='Containers are composed of _layers_. Each one represents a set of file changes analagous (but not the same as) a git commit. This is the history of the "centos" image layers.')
 		shutit.send('docker commit centos_container_1 docker_101_image',note='To create a new image with myfile in, commit the container.')
-		shutit.send('docker ps -q -a | xargs -n 1 docker rm -f 2>&1 > /dev/null &',note='Delete all containers in the background.')
+		shutit.send('docker ps -q -a | xargs -n 1 docker rm -f 2>&1 > /dev/null &')
 		shutit.send('docker images',note='That image is now listed alongside the centos one on our host.')
 		shutit.send('docker history centos',note='Show the centos history.')
 		shutit.send('docker history docker_101_image',note='Show the docker_101_image history. It is the same as the centos image with our extra layer.')
@@ -152,7 +152,7 @@ class docker_101_tutorial(ShutItModule):
 		shutit.send('pwd',note='I am in the root folder again')
 		shutit.send('ls',note='And the file we create earlier is there')
 		shutit.logout(note='exit the container')
-		shutit.send('docker ps -a -q | xargs docker rm -f',note='Clean up all containers on the host.')
+		shutit.send('docker ps -a -q | xargs docker rm -f')
 		shutit.send('docker rmi ' + docker_username + '/docker_101_image',note='Remove the image we just pulled.')
 
 		# DOCKERFILE
@@ -181,7 +181,7 @@ END''')
 		shutit.login('docker run -ti newimage /bin/bash',note='Run the newly-create image.')
 		shutit.send('ls',note='The file myfile2 (from our new layer) and myfile (from our old image) is there.')
 		shutit.logout(note='Log out of the new container - type exit')
-		shutit.send('docker ps -a -q | xargs docker rm -f',note='Clean up all containers on the host.')
+		shutit.send('docker ps -a -q | xargs docker rm -f')
 		shutit.send('docker rmi newimage',note='Destroy this new image')
 
 		shutit.logout()
